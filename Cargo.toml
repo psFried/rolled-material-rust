@@ -1,0 +1,4 @@
+[package]
+name = "fabric-roll"
+version = "0.0.1"
+authors = ["pfried <philipsfried@gmail.com>"]
