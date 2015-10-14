@@ -6,6 +6,8 @@ extern crate piston;
 
 mod test;
 
+use std::path::{Path, PathBuf};
+
 use self::glutin_window::GlutinWindow;
 use self::opengl_graphics::{GlGraphics, OpenGL};
 use self::opengl_graphics::glyph_cache::GlyphCache;
@@ -18,6 +20,7 @@ use self::conrod::{
     Button,
     color,
     Colorable,
+    CharacterCache,
     Labelable,
     Label,
     Sizeable,
@@ -74,7 +77,6 @@ widget_ids!{
 }
 
 
-
 pub fn run() {
     let opengl = OpenGL::V3_2;
     let window: GlutinWindow = WindowSettings::new(
@@ -86,74 +88,71 @@ pub fn run() {
         .build()
         .unwrap();
 
-    let event_iter = window.events().ups(180).max_fps(60);
     let mut gl = GlGraphics::new(opengl);
-    let assets = find_folder::Search::ParentsThenKids(3, 3)
+    let assets: PathBuf = find_folder::Search::ParentsThenKids(3, 3)
         .for_folder("assets").unwrap();
-    let font_path = assets.join("fonts/NotoSans/NotoSans-Regular.ttf");
+    let font_path: PathBuf = assets.join("fonts/NotoSans/NotoSans-Regular.ttf");
     let theme = Theme::default();
-    let glyph_cache = GlyphCache::new(&font_path).unwrap();
+    let glyph_cache: GlyphCache = GlyphCache::new(&font_path).unwrap();
     let ui = &mut Ui::new(glyph_cache, theme);
 
     let mut app_state: AppState = AppState::new();
 
+    let event_iter = window.events().ups(180).max_fps(60);
     for event in event_iter {
         ui.handle_event(&event);
 
         if let Some(args) = event.render_args() {
             gl.draw(args.viewport(), |graphics_context, gl| {
-
-                let vertical_spacing = 40.0;
-                let horizontal_pad = 25.0;
-
-                // Set the background color to use for clearing the screen.
-                Background::new().rgb(0.3, 0.4, 0.5).set(ui);
-
-                // Seems like you have to manually compute x/y for first widget. This seems broken
-                let x: f64 = -(ui.win_w / 2.0) + 110.0;
-                let y: f64 = (ui.win_h / 2.0) - vertical_spacing;
-
-                Label::new("Material Thickness")
-                    .xy(x, y)
-                    .set(THICKNESS_LABEL, ui);
-
-
-                TextBox::new(&mut app_state.thickness_input_value)
-                    .react(fix_numeric_str)
-                    .right_from(THICKNESS_LABEL, horizontal_pad)
-                    .align_middle_y()
-                    .set(THICKNESS_CONTROL, ui);
-
-                Label::new("Outside Diameter")
-                    .down_from(THICKNESS_LABEL, vertical_spacing)
-                    .align_right()
-                    .set(OD_INPUT_LABEL, ui);
-
-                TextBox::new(&mut app_state.od_input_value)
-                    .react(fix_numeric_str)
-                    .right_from(OD_INPUT_LABEL, horizontal_pad)
-                    .align_middle_y()
-                    .set(OD_INPUT_FIELD, ui);
-
-                Label::new("Inside Diameter")
-                    .down_from(OD_INPUT_LABEL, vertical_spacing)
-                    .align_right()
-                    .set(ID_INPUT_LABEL, ui);
-
-                TextBox::new(&mut app_state.id_input_value)
-                    .react(fix_numeric_str)
-                    .right_from(ID_INPUT_LABEL, horizontal_pad)
-                    .align_middle_y()
-                    .set(ID_INPUT_FIELD, ui);
-
-
+                create_ui(ui, &mut app_state);
                 ui.draw_if_changed(graphics_context, gl);
-
             });
         }
-
     }
+}
 
+fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut AppState)  where C: CharacterCache {
+    let vertical_spacing = 40.0;
+    let horizontal_pad = 25.0;
+
+    // Set the background color to use for clearing the screen.
+    Background::new().rgb(0.3, 0.4, 0.5).set(ui);
+
+    // Seems like you have to manually compute x/y for first widget. This seems broken
+    let x: f64 = -(ui.win_w / 2.0) + 110.0;
+    let y: f64 = (ui.win_h / 2.0) - vertical_spacing;
+
+    Label::new("Material Thickness")
+        .xy(x, y)
+        .set(THICKNESS_LABEL, ui);
+
+    TextBox::new(&mut app_state.thickness_input_value)
+        .react(fix_numeric_str)
+        .right_from(THICKNESS_LABEL, horizontal_pad)
+        .align_middle_y()
+        .set(THICKNESS_CONTROL, ui);
+
+    Label::new("Outside Diameter")
+        .down_from(THICKNESS_LABEL, vertical_spacing)
+        .align_right()
+        .set(OD_INPUT_LABEL, ui);
+
+    TextBox::new(&mut app_state.od_input_value)
+        .react(fix_numeric_str)
+        .right_from(OD_INPUT_LABEL, horizontal_pad)
+        .align_middle_y()
+        .set(OD_INPUT_FIELD, ui);
+
+    Label::new("Inside Diameter")
+        .down_from(OD_INPUT_LABEL, vertical_spacing)
+        .align_right()
+        .set(ID_INPUT_LABEL, ui);
+
+    TextBox::new(&mut app_state.id_input_value)
+        .react(fix_numeric_str)
+        .right_from(ID_INPUT_LABEL, horizontal_pad)
+        .align_middle_y()
+        .set(ID_INPUT_FIELD, ui);
 
 }
 
