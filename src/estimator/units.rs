@@ -45,6 +45,10 @@ pub struct Length {
 
 impl Length {
 
+    pub fn new(value: f64, unit: LengthUnit) -> Length {
+        Length{value: value, unit: unit}
+    }
+
     pub fn format(&self) -> String {
         format!("{:.2}{}", self.value, self.unit.abbrev())
     }

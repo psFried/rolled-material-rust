@@ -6,6 +6,13 @@ pub use self::units::*;
 
 pub const EPSILON: f64 = 0.000016f64;
 
+pub struct MaterialRoll {
+    pub id: Length,
+    pub od: Length,
+    pub thickness: Length
+}
+
+
 fn calc_total_length(inside_diameter: &Length, outside_diameter: &Length, thickness: &Length) -> Length {
     let mut current_diameter = inside_diameter.convert_to(METERS).value;
     let od_m = outside_diameter.convert_to(METERS).value;

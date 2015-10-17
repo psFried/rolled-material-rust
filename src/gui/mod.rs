@@ -45,22 +45,34 @@ struct AppState {
     id_input_value: String,
     diameter_inputs_unit: LengthUnit,
     output_value: String,
-    output_unit: LengthUnit
+    output_unit: LengthUnit,
+    material_roll: estimator::MaterialRoll
 }
 
 impl AppState {
 
     fn new() -> AppState {
+        const UNIT: LengthUnit = units::INCHES;
+        let thickness_val = 0.05;
+        let od_val = 20.0;
+        let id_val = 4.0;
+
         AppState {
-            thickness_input_value: "0.05".to_string(),
-            thickness_input_unit: units::INCHES,
-            od_input_value: "20".to_string(),
-            id_input_value: "4".to_string(),
+            thickness_input_value: format!("{:.2}", thickness_val).to_string(),
+            thickness_input_unit: UNIT,
+            od_input_value: format!("{:.2}", od_val).to_string(),
+            id_input_value: format!("{:.2}", id_val).to_string(),
             diameter_inputs_unit: units::INCHES,
             output_value: "##.##".to_string(),
-            output_unit: units::INCHES
+            output_unit: UNIT,
+            material_roll: estimator::MaterialRoll{
+                id: Length::new(id_val, UNIT),
+                od: Length::new(od_val, UNIT),
+                thickness: Length::new(thickness_val, UNIT)
+            }
         }
     }
+
 }
 
 widget_ids!{
