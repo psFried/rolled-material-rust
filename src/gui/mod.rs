@@ -46,7 +46,6 @@ struct AppState {
     diameter_inputs_unit: LengthUnit,
     output_value: String,
     output_unit: LengthUnit,
-    material_roll: estimator::MaterialRoll
 }
 
 impl AppState {
@@ -64,13 +63,24 @@ impl AppState {
             id_input_value: format!("{:.2}", id_val).to_string(),
             diameter_inputs_unit: units::INCHES,
             output_value: "##.##".to_string(),
-            output_unit: UNIT,
-            material_roll: estimator::MaterialRoll{
-                id: Length::new(id_val, UNIT),
-                od: Length::new(od_val, UNIT),
-                thickness: Length::new(thickness_val, UNIT)
-            }
+            output_unit: UNIT
         }
+    }
+
+    fn get_material_roll(&self) -> Option<estimator::MaterialRoll> {
+        let lengths: Option<(Length, Length, Length)> = units::parse_str(&self.thickness_input_value, self.thickness_input_unit.clone())
+            .and_then(|thickness| { units::parse_str(&self.id_input_value, self.diameter_inputs_unit.clone()).map(|id| { (thickness, id) }) })
+            .and_then(|(thickness, id)| { units::parse_str(&self.od_input_value, self.diameter_inputs_unit.clone())
+                .map(|od| { (thickness, id, od) })
+            });
+
+        lengths.map(|(thickness, id, od)| {
+            estimator::MaterialRoll{
+                id: id,
+                od: od,
+                thickness: thickness
+            }
+        })
     }
 
 }

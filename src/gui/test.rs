@@ -1,6 +1,6 @@
 
-
-use super::fix_numeric_str;
+use ::estimator::units::{INCHES, Length};
+use super::{fix_numeric_str, AppState};
 
 #[test]
 fn simple_integer_should_be_unchanged() {
@@ -21,4 +21,17 @@ fn number_with_letter_should_be_truncated_so_only_numeric_chars_remain() {
     let mut number = &mut "123jjk4".to_string();
     fix_numeric_str(&mut number);
     assert_eq!("123".to_string(), *number);
+}
+
+#[test]
+fn app_state_should_return_material_roll_with_parsed_lengths() {
+    let app_state: AppState = AppState::new();
+    let roll_option = app_state.get_material_roll();
+    assert!(roll_option.is_some());
+
+    let material_roll = roll_option.unwrap();
+    assert_eq!(Length::new(0.05, INCHES), material_roll.thickness);
+    assert_eq!(Length::new(4.0, INCHES), material_roll.id);
+    assert_eq!(Length::new(20.0, INCHES), material_roll.od);
+
 }
