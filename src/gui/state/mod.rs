@@ -37,6 +37,12 @@ impl InputState {
             .and_then(|thickness| { units::parse_str(&self.id_input_value, self.diameter_inputs_unit.clone()).map(|id| { (thickness, id) }) })
             .and_then(|(thickness, id)| { units::parse_str(&self.od_input_value, self.diameter_inputs_unit.clone())
                 .map(|od| { (thickness, id, od) })
+            }).and_then(|(thickness, id, od)| {
+                if (thickness.value > 0.0 && id.value > 0.0 && od.value > 0.0) {
+                        Some((thickness, id, od))
+                } else {
+                        None
+                }
             });
 
         lengths.map(|(thickness, id, od)| {

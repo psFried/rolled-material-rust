@@ -131,6 +131,17 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .align_middle_y()
         .set(ID_INPUT_FIELD, ui);
 
+    let output_length = app_state.get_material_roll()
+        .map(|roll| {
+            roll.get_roll_length().convert_to(app_state.output_unit.clone()).format()
+        }).unwrap_or_else(|| {
+        "##.##".to_string()
+    });
+
+    Label::new(&output_length)
+        .down_from(ID_INPUT_LABEL, vertical_spacing)
+        .align_left()
+        .set(OUTPUT_DISPLAY, ui);
 }
 
 #[allow(unused_variables)]
