@@ -1,3 +1,4 @@
+
 pub trait Unit {
     fn abbrev(&self) -> &'static str;
     fn value_to_reference(&self, value: f64) -> f64;
@@ -54,9 +55,17 @@ impl Length {
     }
 
     pub fn convert_to(&self, unit: LengthUnit) -> Length {
-        let value_as_reference = self.unit.value_to_reference(self.value);
-        let converted_value = unit.value_from_reference(value_as_reference);
+        let converted_value: f64 = self.value(&unit);
         return Length { value: converted_value, unit: unit };
+    }
+
+    pub fn value(&self, unit: &LengthUnit) -> f64 {
+        if self.unit == *unit {
+            self.value
+        } else {
+            let value_as_reference = self.unit.value_to_reference(self.value);
+            unit.value_from_reference(value_as_reference)
+        }
     }
 
 }
@@ -83,8 +92,13 @@ fn test_unit_conversion() {
     let len_cm = len_inches.convert_to(CENTIMETERS);
     let eps = 0.0001f64;
     let expected = 167.9194f64;
-    println!("length in cm= {}, in meters= {}", len_cm.value, len_inches.convert_to(METERS).value);
     assert_equals(expected, len_cm.value, eps);
+}
+
+#[test]
+fn length_as_other_unit_should_return_correct_value() {
+    let one_inch = Length::new(1.0, INCHES);
+    assert_equals(2.54, one_inch.value(&CENTIMETERS), 0.01);
 }
 
 #[test]

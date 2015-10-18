@@ -4,6 +4,7 @@ extern crate glutin_window;
 extern crate opengl_graphics;
 extern crate piston;
 
+#[cfg(test)]
 mod test;
 
 use std::path::{Path, PathBuf};

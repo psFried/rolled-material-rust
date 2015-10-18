@@ -1,5 +1,8 @@
 pub mod units;
 
+#[cfg(test)]
+mod test;
+
 use std::f64::consts::PI;
 
 pub use self::units::*;
@@ -12,43 +15,20 @@ pub struct MaterialRoll {
     pub thickness: Length
 }
 
+impl MaterialRoll {
 
-fn calc_total_length(inside_diameter: &Length, outside_diameter: &Length, thickness: &Length) -> Length {
-    let mut current_diameter = inside_diameter.convert_to(METERS).value;
-    let od_m = outside_diameter.convert_to(METERS).value;
-    let thickness_adder = 2f64 * thickness.convert_to(METERS).value;
-    let mut length = 0f64;
-    while current_diameter <= od_m {
-        length += determine_circumfrence(current_diameter);
-        current_diameter += thickness_adder;
+    pub fn get_roll_length(&self) -> Length {
+        let unit: LengthUnit = CENTIMETERS;
+        let mut id_val = self.id.value(&unit);
+        let od = self.od.value(&unit);
+        let thickness = self.thickness.value(&unit);
+        let mut length: f64 = 0.0;
+
+        while id_val < od {
+            length += id_val * PI;
+            id_val += thickness;
+        }
+
+        Length::new(length, unit)
     }
-    Length{value: length, unit: METERS }
-}
-
-fn determine_circumfrence(diameter: f64) -> f64 {
-    diameter * PI
-}
-
-
-#[test]
-fn test_determine_circumference() {
-    assert_is_within(12.56637, determine_circumfrence(4f64), EPSILON);
-
-}
-
-#[test]
-fn test_calc_total_length() {
-    let id = Length{value: 0.1f64, unit: METERS};
-    let od = Length{value: 1.1f64, unit: METERS};
-    let thickness = Length{value: 0.01f64, unit: METERS};
-
-    let result = calc_total_length(&id, &od, &thickness);
-    println!("result= {:?}", result);
-    println!("do yo uhear me?");
-
-}
-
-fn assert_is_within(actual: f64, expected: f64, epsilon: f64) {
-    let diff: f64 = (actual - expected).abs();
-    assert!(diff < epsilon)
 }
