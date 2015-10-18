@@ -5,31 +5,29 @@ use estimator;
 use estimator::units::{self, LengthUnit, Length, parse_str};
 
 
-pub struct AppState {
+pub struct InputState {
     pub thickness_input_value: String,
     pub thickness_input_unit: LengthUnit,
     pub od_input_value: String,
     pub id_input_value: String,
     pub diameter_inputs_unit: LengthUnit,
-    pub output_value: String,
     pub output_unit: LengthUnit,
 }
 
-impl AppState {
+impl InputState {
 
-    pub fn new() -> AppState {
+    pub fn new() -> InputState {
         const UNIT: LengthUnit = units::INCHES;
         let thickness_val = 0.05;
         let od_val = 20.0;
         let id_val = 4.0;
 
-        AppState {
+        InputState {
             thickness_input_value: format!("{:.2}", thickness_val).to_string(),
             thickness_input_unit: UNIT,
             od_input_value: format!("{:.2}", od_val).to_string(),
             id_input_value: format!("{:.2}", id_val).to_string(),
             diameter_inputs_unit: units::INCHES,
-            output_value: "##.##".to_string(),
             output_unit: UNIT
         }
     }

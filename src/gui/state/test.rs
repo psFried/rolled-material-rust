@@ -1,11 +1,11 @@
 
 use ::estimator::units::{INCHES, Length};
-use super::AppState;
+use super::InputState;
 
 
 #[test]
 fn app_state_should_return_material_roll_with_parsed_lengths() {
-    let app_state: AppState = AppState::new();
+    let app_state: InputState = InputState::new();
     let roll_option = app_state.get_material_roll();
     assert!(roll_option.is_some());
 
@@ -18,7 +18,7 @@ fn app_state_should_return_material_roll_with_parsed_lengths() {
 
 #[test]
 fn app_state_get_material_roll_should_return_none_if_id_input_is_invalid() {
-    let mut app_state = AppState::new();
+    let mut app_state = InputState::new();
     app_state.id_input_value = "j/k".to_string();
     let roll_option = app_state.get_material_roll();
 
@@ -27,7 +27,7 @@ fn app_state_get_material_roll_should_return_none_if_id_input_is_invalid() {
 
 #[test]
 fn app_state_get_material_roll_should_return_none_if_od_input_is_invalid() {
-    let mut app_state = AppState::new();
+    let mut app_state = InputState::new();
     app_state.od_input_value = "j/k".to_string();
     let roll_option = app_state.get_material_roll();
 
@@ -36,7 +36,7 @@ fn app_state_get_material_roll_should_return_none_if_od_input_is_invalid() {
 
 #[test]
 fn app_state_get_material_roll_should_return_none_if_thickness_input_is_invalid() {
-    let mut app_state = AppState::new();
+    let mut app_state = InputState::new();
     app_state.thickness_input_value = "j/k".to_string();
     let roll_option = app_state.get_material_roll();
 

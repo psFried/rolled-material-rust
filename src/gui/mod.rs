@@ -9,7 +9,7 @@ mod state;
 #[cfg(test)]
 mod test;
 
-use self::state::AppState;
+use self::state::InputState;
 
 use std::path::{Path, PathBuf};
 
@@ -73,7 +73,7 @@ pub fn run() {
     let glyph_cache: GlyphCache = GlyphCache::new(&font_path).unwrap();
     let ui = &mut Ui::new(glyph_cache, theme);
 
-    let mut app_state: AppState = AppState::new();
+    let mut app_state: InputState = InputState::new();
 
     let event_iter = window.events().ups(180).max_fps(60);
     for event in event_iter {
@@ -88,7 +88,7 @@ pub fn run() {
     }
 }
 
-fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut AppState)  where C: CharacterCache {
+fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterCache {
     let vertical_spacing = 40.0;
     let horizontal_pad = 25.0;
 
