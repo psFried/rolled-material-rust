@@ -138,7 +138,8 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         "##.##".to_string()
     });
 
-    Label::new(&output_length)
+    Label::new(&format!("Total Length: {}", &output_length))
+        .font_size(32)
         .down_from(ID_INPUT_LABEL, vertical_spacing)
         .align_left()
         .set(OUTPUT_DISPLAY, ui);

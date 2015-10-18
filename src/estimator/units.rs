@@ -37,6 +37,7 @@ pub const METERS: LengthUnit = LengthUnit{ full_name: "Meters", abbrev: "m", fac
 pub const CENTIMETERS: LengthUnit = LengthUnit{ full_name: "Centimeters", abbrev: "cm", factor_to_reference: 0.01f64 };
 
 pub const INCHES: LengthUnit = LengthUnit{ full_name: "Inches", abbrev: "in", factor_to_reference: 0.0254f64 };
+pub const YARDS: LengthUnit = LengthUnit{ full_name: "Yards", abbrev: "yrd", factor_to_reference: 0.9144f64 };
 
 #[derive(Debug, PartialEq, Clone)]
 pub struct Length {

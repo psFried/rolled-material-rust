@@ -18,8 +18,8 @@ impl InputState {
 
     pub fn new() -> InputState {
         const UNIT: LengthUnit = units::INCHES;
-        let thickness_val = 0.05;
-        let od_val = 20.0;
+        let thickness_val = 0.08;
+        let od_val = 12.0;
         let id_val = 4.0;
 
         InputState {
@@ -28,7 +28,7 @@ impl InputState {
             od_input_value: format!("{:.2}", od_val).to_string(),
             id_input_value: format!("{:.2}", id_val).to_string(),
             diameter_inputs_unit: units::INCHES,
-            output_unit: UNIT
+            output_unit: units::YARDS
         }
     }
 
@@ -38,7 +38,7 @@ impl InputState {
             .and_then(|(thickness, id)| { units::parse_str(&self.od_input_value, self.diameter_inputs_unit.clone())
                 .map(|od| { (thickness, id, od) })
             }).and_then(|(thickness, id, od)| {
-                if (thickness.value > 0.0 && id.value > 0.0 && od.value > 0.0) {
+                if thickness.value > 0.0 && id.value > 0.0 && od.value > 0.0 {
                         Some((thickness, id, od))
                 } else {
                         None
