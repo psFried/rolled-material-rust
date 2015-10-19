@@ -1,3 +1,4 @@
+use std::ops::{Add, Sub, Mul, Div};
 
 pub trait Unit {
     fn abbrev(&self) -> &'static str;
@@ -52,7 +53,7 @@ impl Length {
     }
 
     pub fn format(&self) -> String {
-        format!("{:.2}{}", self.value, self.unit.abbrev())
+        format!("{:.2} {}", self.value, self.unit.abbrev())
     }
 
     pub fn convert_to(&self, unit: LengthUnit) -> Length {
@@ -71,6 +72,46 @@ impl Length {
 
 }
 
+impl Add for Length {
+    type Output = Length;
+
+    fn add(self, other: Length) -> Length {
+        Length::new(self.value + other.value(&self.unit), self.unit)
+    }
+}
+
+impl Sub for Length {
+    type Output = Length;
+
+    fn sub(self, other: Length) -> Length {
+        Length::new(self.value - other.value(&self.unit), self.unit)
+    }
+}
+
+impl Div<f64> for Length {
+    type Output = Length;
+
+    fn div(self, divisor: f64) -> Length {
+        Length::new(self.value / divisor, self.unit)
+    }
+}
+
+impl Div for Length {
+    type Output = Length;
+
+    fn div(self, other: Length) -> Length {
+        Length::new(self.value / other.value(&self.unit), self.unit)
+    }
+}
+
+impl Mul<f64> for Length {
+    type Output = Length;
+
+    fn mul(self, other: f64) -> Length {
+        Length::new(self.value * other, self.unit)
+    }
+}
+
 pub fn parse_str(input: &str, unit: LengthUnit) -> Option<Length> {
     let trimmed_input = input.trim();
     let value_opt = trimmed_input.parse::<f64>().ok();
@@ -78,41 +119,102 @@ pub fn parse_str(input: &str, unit: LengthUnit) -> Option<Length> {
 }
 
 
-#[test]
-fn test_parse() {
-    let fifty_cm = parse_str("50", CENTIMETERS);
-    assert!(fifty_cm.is_some());
-    let len = fifty_cm.unwrap();
-    assert_eq!(len.unit, CENTIMETERS);
-    assert_equals(50.0f64, len.value, 0.0001f64);
-}
+#[cfg(test)]
+mod test {
+    use super::*;
 
-#[test]
-fn test_unit_conversion() {
-    let len_inches = Length{value: 66.11f64, unit: INCHES};
-    let len_cm = len_inches.convert_to(CENTIMETERS);
-    let eps = 0.0001f64;
-    let expected = 167.9194f64;
-    assert_equals(expected, len_cm.value, eps);
-}
+    const EPSILON: f64 = 0.00001;
 
-#[test]
-fn length_as_other_unit_should_return_correct_value() {
-    let one_inch = Length::new(1.0, INCHES);
-    assert_equals(2.54, one_inch.value(&CENTIMETERS), 0.01);
-}
+    #[test]
+    fn dividing_a_length_by_a_length_should_return_a_length() {
+        let l1 = Length::new(100.0, CENTIMETERS);
+        let l2 = Length::new(0.5, METERS);
+        let result = l1 / l2;
+        assert_eq!(CENTIMETERS, result.unit);
+        assert_equals(2.0, result.value, EPSILON);
+    }
 
-#[test]
-fn test_length_format() {
-    let len = Length{value: 40.0f64, unit: INCHES};
+    #[test]
+    fn dividing_a_length_by_a_number_should_return_a_length() {
+        let l1 = Length::new(10.0, YARDS);
+        let result: Length = l1 / 5.0;
+        assert_eq!(YARDS, result.unit);
+        assert_equals(2.0, result.value, EPSILON);
+    }
 
-    assert_eq!("40.00in".to_string(), len.format());
+    #[test]
+    fn subtracting_a_greater_length_from_a_smaller_one_should_yield_a_negative_length() {
+        let l1 = Length::new(1.0, YARDS);
+        let l2 = Length::new(1.0, METERS);
+        let result = l1 - l2;
+        assert_eq!(YARDS, result.unit);
+        assert_equals(-0.09361, result.value, EPSILON);
+    }
 
-    let len2 = Length{value: 77.333333333333f64, unit: METERS };
-    assert_eq!("77.33m".to_string(), len2.format());
-}
+    #[test]
+    fn subtracting_lengths_should_return_correct_value_when_units_are_different() {
+        let l1 = Length::new(10.0, METERS);
+        let l2 = Length::new(150.0, CENTIMETERS);
+        let result = l1 - l2;
+        assert_eq!(METERS, result.unit);
+        assert_equals(8.5, result.value, EPSILON);
+    }
 
-pub fn assert_equals(expected: f64, actual: f64, epsilon: f64) {
-    assert!(actual <= (expected + epsilon));
-    assert!(actual >= (expected - epsilon));
+    #[test]
+    fn adding_lengths_should_return_correct_sum_when_units_are_the_same() {
+        let l1 = Length::new(5.0, INCHES);
+        let l2 = l1.clone();
+        let result: Length = l1 + l2;
+        assert_eq!(INCHES, result.unit);
+        assert_equals(10.0, result.value, EPSILON);
+    }
+
+    #[test]
+    fn adding_lengths_should_return_correct_sum_when_units_are_different() {
+        let l1 = Length::new(5.0, INCHES);
+        let l2 = Length::new(2.54, CENTIMETERS);
+        let result: Length = l1 + l2;
+        assert_eq!(INCHES, result.unit);
+        assert_equals(6.0, result.value, EPSILON);
+    }
+
+    #[test]
+    fn test_parse() {
+        let fifty_cm = parse_str("50", CENTIMETERS);
+        assert!(fifty_cm.is_some());
+        let len = fifty_cm.unwrap();
+        assert_eq!(len.unit, CENTIMETERS);
+        assert_equals(50.0f64, len.value, 0.0001f64);
+    }
+
+    #[test]
+    fn test_unit_conversion() {
+        let len_inches = Length{value: 66.11f64, unit: INCHES};
+        let len_cm = len_inches.convert_to(CENTIMETERS);
+        let eps = 0.0001f64;
+        let expected = 167.9194f64;
+        assert_equals(expected, len_cm.value, eps);
+    }
+
+    #[test]
+    fn length_as_other_unit_should_return_correct_value() {
+        let one_inch = Length::new(1.0, INCHES);
+        assert_equals(2.54, one_inch.value(&CENTIMETERS), 0.01);
+    }
+
+    #[test]
+    fn formatting_length_should_return_a_human_readable_string() {
+        let len = Length{value: 40.0f64, unit: INCHES};
+
+        assert_eq!("40.00 in".to_string(), len.format());
+
+        let len2 = Length{value: 77.333333333333f64, unit: METERS };
+        assert_eq!("77.33 m".to_string(), len2.format());
+    }
+
+    pub fn assert_equals(expected: f64, actual: f64, epsilon: f64) {
+        let is_within_epsilon = (actual <= (expected + epsilon)) &&
+            actual >= (expected - epsilon);
+        assert!(is_within_epsilon, format!("Expected {:?} to equal {:?} within {:?}", actual, expected, epsilon));
+    }
 }
