@@ -1,4 +1,5 @@
 use std::ops::{Add, Sub, Mul, Div};
+use std::cmp::*;
 
 pub trait Unit {
     fn abbrev(&self) -> &'static str;
@@ -91,6 +92,31 @@ impl Length {
     }
 }
 
+impl PartialOrd for Length {
+
+    fn partial_cmp(&self, other: &Length) -> Option<Ordering> {
+        let other_value: f64 = other.value(&self.unit);
+        self.value.partial_cmp(&other_value)
+    }
+
+    fn lt(&self, other: &Length) -> bool {
+        self.is_less_than(other)
+    }
+
+    fn le(&self, other: &Length) -> bool {
+        self.is_less_than_or_equal(other)
+    }
+
+    fn gt(&self, other: &Length) -> bool {
+        self.is_greater_than(other)
+    }
+
+    fn ge(&self, other: &Length) -> bool {
+        self.is_greater_than_or_equal(other)
+    }
+
+}
+
 impl Add for Length {
     type Output = Length;
 
@@ -142,6 +168,8 @@ mod test {
         let l2 = Length::new(5.0, METERS);
         assert!(l1.is_less_than_or_equal(&l2));
         assert!(l2.is_less_than_or_equal(&l1));
+        assert!(l1 <= l2);
+        assert!(l2 <= l1);
     }
 
     #[test]
@@ -150,6 +178,8 @@ mod test {
         let l2 = Length::new(5.0, METERS);
         assert!(l1.is_less_than_or_equal(&l2));
         assert!(l2.is_less_than_or_equal(&l1) == false);
+        assert!(l1 <= l2);
+        assert!((l2 <= l1) == false);
     }
 
     #[test]
@@ -158,6 +188,8 @@ mod test {
         let l2 = Length::new(5.0, METERS);
         assert!(l1.is_greater_than_or_equal(&l2));
         assert!(l2.is_greater_than_or_equal(&l1));
+        assert!(l1 >= l2);
+        assert!(l2 >= l1);
     }
 
     #[test]
@@ -166,6 +198,8 @@ mod test {
         let l2 = Length::new(5.0, METERS);
         assert!(l1.is_greater_than_or_equal(&l2) == false);
         assert!(l2.is_greater_than_or_equal(&l1));
+        assert!((l1 >= l2) == false);
+        assert!(l2 >= l1);
     }
 
     #[test]
@@ -173,6 +207,7 @@ mod test {
         let small = Length::new(2.0, CENTIMETERS);
         let large = Length::new(1.0, METERS);
         assert!(large.is_less_than(&small) == false);
+        assert!((large < small) == false);
     }
 
     #[test]
@@ -180,6 +215,7 @@ mod test {
         let small = Length::new(2.0, CENTIMETERS);
         let large = Length::new(1.0, METERS);
         assert!(small.is_less_than(&large));
+        assert!(small < large);
     }
 
     #[test]
@@ -187,6 +223,7 @@ mod test {
         let small = Length::new(2.0, CENTIMETERS);
         let large = Length::new(1.0, METERS);
         assert!(large.is_greater_than(&small));
+        assert!(large > small);
     }
 
     #[test]
@@ -194,6 +231,7 @@ mod test {
         let small = Length::new(2.0, CENTIMETERS);
         let large = Length::new(1.0, METERS);
         assert!(small.is_greater_than(&large) == false);
+        assert!((small > large) == false);
     }
 
     #[test]
