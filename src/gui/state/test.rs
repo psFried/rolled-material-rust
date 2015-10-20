@@ -10,9 +10,9 @@ fn app_state_should_return_material_roll_with_parsed_lengths() {
     assert!(roll_option.is_some());
 
     let material_roll = roll_option.unwrap();
-    assert_eq!(Length::new(0.05, INCHES), material_roll.thickness);
+    assert_eq!(Length::new(0.08, INCHES), material_roll.thickness);
     assert_eq!(Length::new(4.0, INCHES), material_roll.id);
-    assert_eq!(Length::new(20.0, INCHES), material_roll.od);
+    assert_eq!(Length::new(12.0, INCHES), material_roll.od);
 
 }
 

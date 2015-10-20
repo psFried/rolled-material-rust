@@ -96,14 +96,6 @@ impl Div<f64> for Length {
     }
 }
 
-impl Div for Length {
-    type Output = Length;
-
-    fn div(self, other: Length) -> Length {
-        Length::new(self.value / other.value(&self.unit), self.unit)
-    }
-}
-
 impl Mul<f64> for Length {
     type Output = Length;
 
@@ -124,15 +116,6 @@ mod test {
     use super::*;
 
     const EPSILON: f64 = 0.00001;
-
-    #[test]
-    fn dividing_a_length_by_a_length_should_return_a_length() {
-        let l1 = Length::new(100.0, CENTIMETERS);
-        let l2 = Length::new(0.5, METERS);
-        let result = l1 / l2;
-        assert_eq!(CENTIMETERS, result.unit);
-        assert_equals(2.0, result.value, EPSILON);
-    }
 
     #[test]
     fn dividing_a_length_by_a_number_should_return_a_length() {
