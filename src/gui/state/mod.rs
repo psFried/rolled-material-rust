@@ -33,12 +33,17 @@ impl InputState {
     }
 
     pub fn get_material_roll(&self) -> Option<estimator::MaterialRoll> {
+        let zero: Length = Length::zero();
+
         let lengths: Option<(Length, Length, Length)> = units::parse_str(&self.thickness_input_value, self.thickness_input_unit.clone())
             .and_then(|thickness| { units::parse_str(&self.id_input_value, self.diameter_inputs_unit.clone()).map(|id| { (thickness, id) }) })
             .and_then(|(thickness, id)| { units::parse_str(&self.od_input_value, self.diameter_inputs_unit.clone())
                 .map(|od| { (thickness, id, od) })
             }).and_then(|(thickness, id, od)| {
-                if thickness.value > 0.0 && id.value > 0.0 && od.value > 0.0 {
+                if (thickness.is_greater_than(&zero)
+                    && id.is_greater_than(&zero)
+                    && od.is_greater_than(&zero)
+                    && od.is_greater_than(&id)) {
                         Some((thickness, id, od))
                 } else {
                         None

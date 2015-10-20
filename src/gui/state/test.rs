@@ -69,3 +69,12 @@ fn app_state_get_material_roll_should_return_none_if_od_input_is_not_greater_tha
 
     assert!(roll_option.is_none());
 }
+
+#[test]
+fn app_state_get_material_roll_should_return_none_if_od_is_not_greater_than_id() {
+    let mut app_state = InputState::new();
+    app_state.id_input_value = app_state.od_input_value.clone();
+    let roll_option = app_state.get_material_roll();
+
+    assert!(roll_option.is_none());
+}

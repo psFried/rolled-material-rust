@@ -70,6 +70,25 @@ impl Length {
         }
     }
 
+    pub fn is_greater_than(&self, other: &Length) -> bool {
+        self.value > other.value(&self.unit)
+    }
+
+    pub fn is_less_than(&self, other: &Length) -> bool {
+        self.value < other.value(&self.unit)
+    }
+
+    pub fn is_greater_than_or_equal(&self, other: &Length) -> bool {
+        !self.is_less_than(other)
+    }
+
+    pub fn is_less_than_or_equal(&self, other: &Length) -> bool {
+        !self.is_greater_than(other)
+    }
+
+    pub fn zero() -> Length {
+        Length::new(0.0, CENTIMETERS)
+    }
 }
 
 impl Add for Length {
@@ -116,6 +135,66 @@ mod test {
     use super::*;
 
     const EPSILON: f64 = 0.00001;
+
+    #[test]
+    fn less_or_equal_should_return_true_if_length_are_equal() {
+        let l1 = Length::new(500.0, CENTIMETERS);
+        let l2 = Length::new(5.0, METERS);
+        assert!(l1.is_less_than_or_equal(&l2));
+        assert!(l2.is_less_than_or_equal(&l1));
+    }
+
+    #[test]
+    fn less_or_equal_should_return_true_if_length_is_greater() {
+        let l1 = Length::new(5.0, CENTIMETERS);
+        let l2 = Length::new(5.0, METERS);
+        assert!(l1.is_less_than_or_equal(&l2));
+        assert!(l2.is_less_than_or_equal(&l1) == false);
+    }
+
+    #[test]
+    fn greater_or_equal_should_return_true_if_length_are_equal() {
+        let l1 = Length::new(500.0, CENTIMETERS);
+        let l2 = Length::new(5.0, METERS);
+        assert!(l1.is_greater_than_or_equal(&l2));
+        assert!(l2.is_greater_than_or_equal(&l1));
+    }
+
+    #[test]
+    fn greater_or_equal_should_return_true_if_length_is_greater() {
+        let l1 = Length::new(5.0, CENTIMETERS);
+        let l2 = Length::new(5.0, METERS);
+        assert!(l1.is_greater_than_or_equal(&l2) == false);
+        assert!(l2.is_greater_than_or_equal(&l1));
+    }
+
+    #[test]
+    fn a_large_length_should_not_be_less_than_a_smaller_one() {
+        let small = Length::new(2.0, CENTIMETERS);
+        let large = Length::new(1.0, METERS);
+        assert!(large.is_less_than(&small) == false);
+    }
+
+    #[test]
+    fn a_small_length_should_be_less_than_a_larger_one() {
+        let small = Length::new(2.0, CENTIMETERS);
+        let large = Length::new(1.0, METERS);
+        assert!(small.is_less_than(&large));
+    }
+
+    #[test]
+    fn a_large_length_should_be_greater_than_a_smaller_one() {
+        let small = Length::new(2.0, CENTIMETERS);
+        let large = Length::new(1.0, METERS);
+        assert!(large.is_greater_than(&small));
+    }
+
+    #[test]
+    fn a_small_length_should_not_be_greater_than_a_larger_one() {
+        let small = Length::new(2.0, CENTIMETERS);
+        let large = Length::new(1.0, METERS);
+        assert!(small.is_greater_than(&large) == false);
+    }
 
     #[test]
     fn dividing_a_length_by_a_number_should_return_a_length() {
