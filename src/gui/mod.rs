@@ -145,6 +145,12 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .set(OUTPUT_DISPLAY, ui);
 }
 
+fn react_to_input<C>(input: &mut String, ui: &Ui<C>, widget_id: WidgetId) where C: CharacterCache {
+    fix_numeric_str(input);
+    //TODO: tell ui to have the given widget capture the keyboard
+}
+
+
 #[allow(unused_variables)]
 fn fix_numeric_str(input: &mut String) {
     let number_base = 10;

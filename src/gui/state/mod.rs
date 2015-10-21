@@ -40,13 +40,13 @@ impl InputState {
             .and_then(|(thickness, id)| { units::parse_str(&self.od_input_value, self.diameter_inputs_unit.clone())
                 .map(|od| { (thickness, id, od) })
             }).and_then(|(thickness, id, od)| {
-                if (thickness > zero &&
-                    id > zero &&
-                    od > zero &&
-                    od > id) {
-                        Some((thickness, id, od))
+                if thickness > zero &&
+                        id > zero &&
+                        od > zero &&
+                        od > id {
+                    Some((thickness, id, od))
                 } else {
-                        None
+                    None
                 }
             });
 
