@@ -3,6 +3,7 @@ extern crate find_folder;
 extern crate glutin_window;
 extern crate opengl_graphics;
 extern crate piston;
+extern crate input;
 
 mod state;
 
@@ -19,6 +20,8 @@ use self::opengl_graphics::glyph_cache::GlyphCache;
 use self::piston::event_loop::{Events, EventLoop};
 use self::piston::input::{RenderEvent};
 use self::piston::window::{WindowSettings, Size};
+use self::conrod::WidgetIndex;
+
 
 use self::conrod::{
     Background,
@@ -55,6 +58,22 @@ widget_ids!{
 
 
 pub fn run() {
+    // Construct the window.
+    // let window: PistonWindow = WindowSettings::new("Click me!", [200, 100])
+    //     .exit_on_esc(true).build().unwrap();
+    //
+    // // construct our `Ui`.
+    // let mut ui = {
+    //     let assets = find_folder::Search::ParentsThenKids(3, 3)
+    //         .for_folder("assets").unwrap();
+    //     let font_path = assets.join("fonts/NotoSans/NotoSans-Regular.ttf");
+    //     let theme = Theme::default();
+    //     let glyph_cache = Glyphs::new(&font_path, window.factory.borrow().clone());
+    //     Ui::new(glyph_cache.unwrap(), theme)
+    // };
+
+    println!("thickness= {:?}, od= {:?}, id= {:?}", THICKNESS_CONTROL, OD_INPUT_FIELD, ID_INPUT_FIELD);
+
     let opengl = OpenGL::V3_2;
     let window: GlutinWindow = WindowSettings::new(
             "Estimate Rolled Material Length".to_string(),
@@ -76,6 +95,7 @@ pub fn run() {
     let mut app_state: InputState = InputState::new();
 
     let event_iter = window.events().ups(180).max_fps(60);
+
     for event in event_iter {
         ui.handle_event(&event);
 
@@ -92,6 +112,13 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
     let vertical_spacing = 40.0;
     let horizontal_pad = 25.0;
 
+    let focus_thickness = app_state.focus_next == Some(THICKNESS_CONTROL);
+    let focus_od = app_state.focus_next == Some(OD_INPUT_FIELD);
+    let focus_id = app_state.focus_next == Some(ID_INPUT_FIELD);
+    app_state.focus_next.take();
+
+    let mut focus_next: Option<WidgetId> = None;
+
     // Set the background color to use for clearing the screen.
     Background::new().rgb(0.3, 0.4, 0.5).set(ui);
 
@@ -104,9 +131,13 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .set(THICKNESS_LABEL, ui);
 
     TextBox::new(&mut app_state.thickness_input_value)
-        .react(fix_numeric_str)
+        .react(|new_val: &mut String| {
+            fix_numeric_str(new_val);
+            focus_next = Some(OD_INPUT_FIELD);
+        })
         .right_from(THICKNESS_LABEL, horizontal_pad)
         .align_middle_y()
+        .steal_focus(focus_thickness)
         .set(THICKNESS_CONTROL, ui);
 
     Label::new("Outside Diameter")
@@ -115,9 +146,13 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .set(OD_INPUT_LABEL, ui);
 
     TextBox::new(&mut app_state.od_input_value)
-        .react(fix_numeric_str)
+        .react(|new_val: &mut String| {
+            fix_numeric_str(new_val);
+            focus_next = Some(ID_INPUT_FIELD);
+        })
         .right_from(OD_INPUT_LABEL, horizontal_pad)
         .align_middle_y()
+        .steal_focus(focus_od)
         .set(OD_INPUT_FIELD, ui);
 
     Label::new("Inside Diameter")
@@ -126,10 +161,16 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .set(ID_INPUT_LABEL, ui);
 
     TextBox::new(&mut app_state.id_input_value)
-        .react(fix_numeric_str)
+        .react(|new_val: &mut String| {
+            fix_numeric_str(new_val);
+            focus_next = Some(THICKNESS_CONTROL);
+        })
         .right_from(ID_INPUT_LABEL, horizontal_pad)
         .align_middle_y()
+        .steal_focus(focus_id)
         .set(ID_INPUT_FIELD, ui);
+
+    app_state.focus_next = focus_next;
 
     let output_length = app_state.get_material_roll()
         .map(|roll| {
@@ -143,13 +184,8 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .down_from(ID_INPUT_LABEL, vertical_spacing)
         .align_left()
         .set(OUTPUT_DISPLAY, ui);
-}
 
-fn react_to_input<C>(input: &mut String, ui: &Ui<C>, widget_id: WidgetId) where C: CharacterCache {
-    fix_numeric_str(input);
-    //TODO: tell ui to have the given widget capture the keyboard
 }
-
 
 #[allow(unused_variables)]
 fn fix_numeric_str(input: &mut String) {

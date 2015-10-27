@@ -3,6 +3,7 @@ mod test;
 
 use estimator;
 use estimator::units::{self, LengthUnit, Length, parse_str};
+use super::conrod::WidgetId;
 
 
 pub struct InputState {
@@ -12,6 +13,7 @@ pub struct InputState {
     pub id_input_value: String,
     pub diameter_inputs_unit: LengthUnit,
     pub output_unit: LengthUnit,
+    pub focus_next: Option<WidgetId>
 }
 
 impl InputState {
@@ -28,7 +30,8 @@ impl InputState {
             od_input_value: format!("{:.2}", od_val).to_string(),
             id_input_value: format!("{:.2}", id_val).to_string(),
             diameter_inputs_unit: units::INCHES,
-            output_unit: units::YARDS
+            output_unit: units::YARDS,
+            focus_next: None
         }
     }
 
