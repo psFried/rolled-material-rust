@@ -112,11 +112,7 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
     let vertical_spacing = 40.0;
     let horizontal_pad = 25.0;
 
-    let focus_thickness = app_state.focus_next == Some(THICKNESS_CONTROL);
-    let focus_od = app_state.focus_next == Some(OD_INPUT_FIELD);
-    let focus_id = app_state.focus_next == Some(ID_INPUT_FIELD);
     app_state.focus_next.take();
-
     let mut focus_next: Option<WidgetId> = None;
 
     // Set the background color to use for clearing the screen.
@@ -137,7 +133,6 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         })
         .right_from(THICKNESS_LABEL, horizontal_pad)
         .align_middle_y()
-        .steal_focus(focus_thickness)
         .set(THICKNESS_CONTROL, ui);
 
     Label::new("Outside Diameter")
@@ -152,7 +147,6 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         })
         .right_from(OD_INPUT_LABEL, horizontal_pad)
         .align_middle_y()
-        .steal_focus(focus_od)
         .set(OD_INPUT_FIELD, ui);
 
     Label::new("Inside Diameter")
@@ -167,7 +161,6 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         })
         .right_from(ID_INPUT_LABEL, horizontal_pad)
         .align_middle_y()
-        .steal_focus(focus_id)
         .set(ID_INPUT_FIELD, ui);
 
     app_state.focus_next = focus_next;
@@ -185,6 +178,9 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .align_left()
         .set(OUTPUT_DISPLAY, ui);
 
+    if let Some(widget_id) = focus_next {
+        ui.change_focus_to(widget_id);
+    }
 }
 
 #[allow(unused_variables)]
