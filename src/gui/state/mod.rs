@@ -2,18 +2,16 @@
 mod test;
 
 use estimator;
-use estimator::units::{self, LengthUnit, Length, parse_str};
+use estimator::units::{self, Unit, LengthUnit, Length, parse_str};
 use super::conrod::WidgetId;
 
 
 pub struct InputState {
     pub thickness_input_value: String,
-    pub thickness_input_unit: LengthUnit,
     pub od_input_value: String,
     pub id_input_value: String,
-    pub diameter_inputs_unit: LengthUnit,
-    pub output_unit: LengthUnit,
-    pub focus_next: Option<WidgetId>
+    pub valid_units: Vec<LengthUnit>,
+    pub selected_unit: Option<usize>
 }
 
 impl InputState {
@@ -26,21 +24,31 @@ impl InputState {
 
         InputState {
             thickness_input_value: format!("{:.2}", thickness_val).to_string(),
-            thickness_input_unit: UNIT,
             od_input_value: format!("{:.2}", od_val).to_string(),
             id_input_value: format!("{:.2}", id_val).to_string(),
-            diameter_inputs_unit: units::INCHES,
-            output_unit: units::YARDS,
-            focus_next: None
+            valid_units: vec![units::CENTIMETERS, units::INCHES],
+            selected_unit: Some(0)
         }
+    }
+
+    pub fn get_input_unit(&self) -> LengthUnit {
+        self.valid_units[self.selected_unit.unwrap_or(0)].clone()
+    }
+
+    pub fn get_output_unit(&self) -> LengthUnit {
+        units::YARDS
+    }
+
+    pub fn get_input_unit_strings(&self) -> Vec<String> {
+        self.valid_units.iter().map(|unit| unit.full_name().to_string()).collect::<Vec<String>>()
     }
 
     pub fn get_material_roll(&self) -> Option<estimator::MaterialRoll> {
         let zero: Length = Length::zero();
 
-        let lengths: Option<(Length, Length, Length)> = units::parse_str(&self.thickness_input_value, self.thickness_input_unit.clone())
-            .and_then(|thickness| { units::parse_str(&self.id_input_value, self.diameter_inputs_unit.clone()).map(|id| { (thickness, id) }) })
-            .and_then(|(thickness, id)| { units::parse_str(&self.od_input_value, self.diameter_inputs_unit.clone())
+        let lengths: Option<(Length, Length, Length)> = units::parse_str(&self.thickness_input_value, self.get_input_unit())
+            .and_then(|thickness| { units::parse_str(&self.id_input_value, self.get_input_unit()).map(|id| { (thickness, id) }) })
+            .and_then(|(thickness, id)| { units::parse_str(&self.od_input_value, self.get_input_unit())
                 .map(|od| { (thickness, id, od) })
             }).and_then(|(thickness, id, od)| {
                 if thickness > zero &&

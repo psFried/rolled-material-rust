@@ -11,6 +11,7 @@ mod state;
 mod test;
 
 use self::state::InputState;
+use ::estimator::units::{self, Unit, LengthUnit};
 
 use std::path::{Path, PathBuf};
 
@@ -20,8 +21,6 @@ use self::opengl_graphics::glyph_cache::GlyphCache;
 use self::piston::event_loop::{Events, EventLoop};
 use self::piston::input::{RenderEvent};
 use self::piston::window::{WindowSettings, Size};
-use self::conrod::WidgetIndex;
-
 
 use self::conrod::{
     Background,
@@ -29,6 +28,7 @@ use self::conrod::{
     color,
     Colorable,
     CharacterCache,
+    DropDownList,
     Labelable,
     Label,
     Sizeable,
@@ -39,6 +39,7 @@ use self::conrod::{
     Frameable,
     Positionable,
     TextBox,
+    WidgetIndex,
     WidgetId
 };
 
@@ -58,26 +59,12 @@ widget_ids!{
 
 
 pub fn run() {
-    // Construct the window.
-    // let window: PistonWindow = WindowSettings::new("Click me!", [200, 100])
-    //     .exit_on_esc(true).build().unwrap();
-    //
-    // // construct our `Ui`.
-    // let mut ui = {
-    //     let assets = find_folder::Search::ParentsThenKids(3, 3)
-    //         .for_folder("assets").unwrap();
-    //     let font_path = assets.join("fonts/NotoSans/NotoSans-Regular.ttf");
-    //     let theme = Theme::default();
-    //     let glyph_cache = Glyphs::new(&font_path, window.factory.borrow().clone());
-    //     Ui::new(glyph_cache.unwrap(), theme)
-    // };
-
     println!("thickness= {:?}, od= {:?}, id= {:?}", THICKNESS_CONTROL, OD_INPUT_FIELD, ID_INPUT_FIELD);
 
     let opengl = OpenGL::V3_2;
     let window: GlutinWindow = WindowSettings::new(
             "Estimate Rolled Material Length".to_string(),
-            Size { width: 500, height: 300 }
+            Size { width: 800, height: 300 }
         ).opengl(opengl)
         .exit_on_esc(true)
         .samples(4)
@@ -93,6 +80,7 @@ pub fn run() {
     let ui = &mut Ui::new(glyph_cache, theme);
 
     let mut app_state: InputState = InputState::new();
+    let mut input_units = app_state.get_input_unit_strings();
 
     let event_iter = window.events().ups(180).max_fps(60);
 
@@ -101,18 +89,17 @@ pub fn run() {
 
         if let Some(args) = event.render_args() {
             gl.draw(args.viewport(), |graphics_context, gl| {
-                create_ui(ui, &mut app_state);
+                create_ui(ui, &mut app_state, &mut input_units);
                 ui.draw_if_changed(graphics_context, gl);
             });
         }
     }
 }
 
-fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterCache {
+fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState, input_units: &mut Vec<String>)  where C: CharacterCache {
     let vertical_spacing = 40.0;
     let horizontal_pad = 25.0;
 
-    app_state.focus_next.take();
     let mut focus_next: Option<WidgetId> = None;
 
     // Set the background color to use for clearing the screen.
@@ -135,6 +122,13 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .align_middle_y()
         .set(THICKNESS_CONTROL, ui);
 
+    DropDownList::new(input_units, &mut app_state.selected_unit)
+        .right_from(THICKNESS_CONTROL, 20.0)
+        .react(|selected_idx: &mut Option<usize>, new_idx: usize, val: &str| {
+            *selected_idx = Some(new_idx);
+        })
+        .set(THICKNESS_UNIT_DROP_DOWN, ui);
+
     Label::new("Outside Diameter")
         .down_from(THICKNESS_LABEL, vertical_spacing)
         .align_right()
@@ -148,6 +142,8 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .right_from(OD_INPUT_LABEL, horizontal_pad)
         .align_middle_y()
         .set(OD_INPUT_FIELD, ui);
+
+
 
     Label::new("Inside Diameter")
         .down_from(OD_INPUT_LABEL, vertical_spacing)
@@ -163,11 +159,9 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .align_middle_y()
         .set(ID_INPUT_FIELD, ui);
 
-    app_state.focus_next = focus_next;
-
     let output_length = app_state.get_material_roll()
         .map(|roll| {
-            roll.get_roll_length().convert_to(app_state.output_unit.clone()).format()
+            roll.get_roll_length().convert_to(app_state.get_output_unit()).format()
         }).unwrap_or_else(|| {
         "##.##".to_string()
     });
@@ -178,9 +172,9 @@ fn create_ui<C>(ui: &mut Ui<C>, app_state: &mut InputState)  where C: CharacterC
         .align_left()
         .set(OUTPUT_DISPLAY, ui);
 
-    if let Some(widget_id) = focus_next {
-        ui.change_focus_to(widget_id);
-    }
+    // if let Some(widget_id) = focus_next {
+    //     ui.change_focus_to(widget_id);
+    // }
 }
 
 #[allow(unused_variables)]

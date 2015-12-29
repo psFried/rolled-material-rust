@@ -1,7 +1,7 @@
 use std::ops::{Add, Sub, Mul, Div};
 use std::cmp::*;
 
-pub trait Unit {
+pub trait Unit: Sized {
     fn abbrev(&self) -> &'static str;
     fn value_to_reference(&self, value: f64) -> f64;
     fn value_from_reference(&self, ref_value: f64) -> f64;

@@ -5,14 +5,13 @@ authors = ["pfried <philipsfried@gmail.com>"]
 
 
 [dependencies]
-find_folder = "0.2.0"
+find_folder = "0.3.0"
 conrod = { path = "../conrod" }
-piston = "0.13.0"
-gfx = "0.7.1"
-gfx_device_gl = "0.5.0"
+piston = "0.15"
+gfx = "0.8"
 piston-viewport = "0.2.0"
-piston_window = "0.23.0"
-piston2d-gfx_graphics = "0.10.0"
-piston2d-opengl_graphics = "0.14.0"
-pistoncore-glutin_window = "0.15.0"
+piston_window = "0.28"
+piston2d-gfx_graphics = "0.13"
+piston2d-opengl_graphics = "0.18"
+pistoncore-glutin_window = "0.17"
 pistoncore-input = "0.8.0"
